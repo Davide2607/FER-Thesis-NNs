@@ -1,15 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=dbuhnila/tesi
 #SBATCH --mail-type=ALL
-#SBATCH --mail-user=s331394@studenti.polito.it
-#SBATCH --partition=global
-#SBATCH --time=5:00
+#SBATCH --mail-user=ppp36213@gmail.com
+#SBATCH --partition=cpu_skylake
+#SBATCH --time=00:10:00
 #SBATCH --nodes=1
-#SBATCH --mem=10000
+#SBATCH --mem=1G
 #SBATCH --ntasks-per-node=1
-#SBATCH --gres=gpu:0z
-#SBATCH --output=err_log/train_%j.log
-#SBATCH --error=err_log/train_%j.err
+#SBATCH --output=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
+#SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.err
 module load intel/python/3/2019.4.088
 module load nvidia/cudasdk/11.6
 source /home/dbuhnila/myvenv/bin/activate

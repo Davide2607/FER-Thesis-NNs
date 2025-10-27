@@ -1,0 +1,58 @@
+#!/bin/bash
+#SBATCH --job-name=dbuhnila/tesi
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=ppp36213@gmail.com
+#SBATCH --partition=gpu_v100
+#SBATCH --time=00:10:00
+#SBATCH --nodes=1
+#SBATCH --mem=1G
+#SBATCH --ntasks-per-node=1
+#SBATCH --gres=gpu:1
+#SBATCH --output=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
+#SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.err
+
+module load miniconda3/3.13.25
+
+# confirm conda is found
+which conda
+conda --version
+
+# accept Anaconda channels' ToS (replace CHANNEL with the shown URLs)
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+
+conda create -n fer-thesis python=3.11 -y
+echo "=========================================================================="
+echo "Created venv!"
+echo "=========================================================================="
+
+conda activate fer-thesis
+echo "=========================================================================="
+echo "Activated venv!"
+echo "=========================================================================="
+
+
+python -m pip install --upgrade pip setuptools wheel
+echo "=========================================================================="
+echo "Upgraded pip!"
+echo "=========================================================================="
+
+python -m pip install tensorflow-io-gcs-filesystem==0.31.0
+echo "=========================================================================="
+echo "Installed tf io-gs-fs!"
+echo "=========================================================================="
+
+python -m pip install tensorflow==2.15.0
+echo "=========================================================================="
+echo "Installed tf!"
+echo "=========================================================================="
+
+python -m pip install h5py "numpy>=1.23.5,<2.0.0" Pillow scikit-learn ultralytics
+echo "=========================================================================="
+echo "Installed other dependencies! (h5, np, PIL, skl, ultralytics)"
+echo "=========================================================================="
+
+
+conda activate fer-thesis
+python -c "import tensorflow as tf; print('tf',tf.__version__); print(tf.sysconfig.get_build_info()); print('gpus:', tf.config.list_physical_devices('GPU'))"
