@@ -9,6 +9,6 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --gres=gpu:1
 #SBATCH --output=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
-#SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.err
+#SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 echo "running python ./scripts/hello_world.py"
 python ./scripts/hello_world.py
