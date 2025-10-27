@@ -10,7 +10,12 @@
 #SBATCH --gres=gpu:1
 #SBATCH --output=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 #SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.err
-module load intel/python/3/2019.4.088
-module load nvidia/cudasdk/11.6
-source /home/dbuhnila/myvenv/bin/activate
-cd /home/famato/final_scripts/scripts
+
+module load miniconda3/3.13.25
+
+source activate base
+conda activate fer-thesis
+echo "=========================================================================="
+echo "Activated venv!"
+python -c "import sys; print('Python executable:', sys.executable); print('Environment:', sys.prefix)"
+echo "=========================================================================="
