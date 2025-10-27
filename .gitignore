@@ -1,8 +1,8 @@
 /.venv
 /data
-/results_heavy
-modules/__pycache__/config.cpython-311.pyc
-
+/modules/__pycache__/config.cpython-311.pyc
+/results_heavy/*
+!/results_heavy/placeholder
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
