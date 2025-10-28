@@ -9,7 +9,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --gres=gpu:1
 #SBATCH --output=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
-#SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.err
+#SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 
 module load miniconda3/3.13.25
 
