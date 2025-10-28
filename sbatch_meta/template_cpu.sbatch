@@ -18,3 +18,8 @@ echo "==========================================================================
 echo "Activated venv!"
 python -c "import sys; print('Python executable:', sys.executable); print('Environment:', sys.prefix)"
 echo "=========================================================================="
+
+cd /home/dbuhnila/models/FER-Thesis-NNs
+pwd
+
+

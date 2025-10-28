@@ -31,8 +31,8 @@ PATHS = {
 # ============== MACROS ===============
 MODEL_PATHS_SUBSET = ALL_MODELS_PATHS
 TEST_SET = "ADELE"  # Options: "ADELE", "OCCLUDED"
-# MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning", "yolo_last"]
-MODELS_NAMES = ["yolo_last"]
+MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning", "yolo_last"]
+# MODELS_NAMES = ["yolo_last"]
 
 REDIRECT_OUTPUT = False
 LOG_FILE = os.path.join(ACCURACY_RESULTS_PATH, f"{time.strftime('%Y%m%d-%H%M%S')}_accuracies_{TEST_SET.lower()}.log")
@@ -128,11 +128,20 @@ def evaluate_model(model, model_name, test_generator):
 
 
 if __name__ == "__main__":
+    # 0) Setup macros as args
+    if sys.argv.__len__() == 2:
+        TEST_SET = sys.argv[1]
+    elif sys.argv.__len__() > 2:
+        print("Usage: python evaluate_model.py [TEST_SET]")
+        sys.exit(1)
+
     # 1) Load the test set
     # if you can't find the h5 file, generate it from the images
     if not os.path.exists(PATHS[TEST_SET]["test_set_h5"]):
         generate_h5_from_images(PATHS[TEST_SET]["test_set"], PATHS[TEST_SET]["test_set_resized"], PATHS[TEST_SET]["test_set_h5"])
     test_generator = load_data_generator(PATHS[TEST_SET]["test_set_h5"], 'test')
+
+    print(f"Loaded {TEST_SET} test set with {test_generator.n} samples.")
 
     # 2) Run the evaluations on the test set
     models_results = {name: {"test_loss": None, "test_acc": None} for name in MODELS_NAMES}

@@ -22,4 +22,6 @@ echo "==========================================================================
 
 cd /home/dbuhnila/models/FER-Thesis-NNs
 pwd
-python evaluate_model.py
+
+python ./scripts/evaluate_model.py "ADELE"
+python ./scripts/evaluate_model.py "OCCLUDED"
