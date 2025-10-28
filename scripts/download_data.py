@@ -4,14 +4,16 @@ import os
 import shutil
 
 STEPS = {
-    "DOWNLOAD": False,
+    "DOWNLOAD": True,
     "EXTRACT": True,
     "MOVE": True,
 }
 
+DOWNLOADS_DIR = os.path.join(".", "downloads")
+
 if __name__ == "__main__":
-    output = "data.zip"
-    
+    output = os.path.join(DOWNLOADS_DIR, "data.zip")
+
     if STEPS["DOWNLOAD"]:
         url = "https://drive.google.com/uc?id=1HFdR2lWlECHSUEgwiueuI7Txgehd88v2&export=download"
         gdown.download(url, output, quiet=False)
