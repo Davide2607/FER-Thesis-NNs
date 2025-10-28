@@ -18,6 +18,7 @@ conda activate fer-thesis
 echo "=========================================================================="
 echo "Activated venv!"
 python -c "import sys; print('Python executable:', sys.executable); print('Environment:', sys.prefix)"
+python -c "import tensorflow as tf; print('GPUs available:' if tf.config.list_physical_devices('GPU') else 'No GPUs available')"
 echo "=========================================================================="
 
 cd /home/dbuhnila/models/FER-Thesis-NNs

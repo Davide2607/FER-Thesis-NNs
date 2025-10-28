@@ -3,14 +3,19 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ppp36213@gmail.com
 #SBATCH --partition=cpu_skylake
-#SBATCH --time=00:01:00
+#SBATCH --time=00:10:00
 #SBATCH --nodes=1
 #SBATCH --mem=100M
 #SBATCH --ntasks-per-node=1
 #SBATCH --output=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 #SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 
-echo "running python ./scripts/hello_world.py"
-cd /home/dbuhnila/models/FER-Thesis-NNs/scripts
-python hello_world.py
+module avail spack
+module load spack
+
+echo "spack version:"
+spack --version
+
+echo "spack list:"
+spack list 
 
