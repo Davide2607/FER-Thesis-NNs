@@ -11,4 +11,5 @@
 #SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 
 echo "running python ./scripts/hello_world.py"
-python ./scripts/hello_world.py
+cd /home/dbuhnila/models/FER-Thesis-NNs/scripts
+python hello_world.py

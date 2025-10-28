@@ -1,5 +1,6 @@
-import os
 import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import time
 import tensorflow as tf
 import numpy as np
@@ -30,8 +31,8 @@ PATHS = {
 # ============== MACROS ===============
 MODEL_PATHS_SUBSET = ALL_MODELS_PATHS
 TEST_SET = "OCCLUDED"  # Options: "ADELE", "OCCLUDED"
-# MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning", "yolo_last"]
-MODELS_NAMES = ["yolo_last"]
+MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning"]
+# MODELS_NAMES = ["yolo_last"]
 
 REDIRECT_OUTPUT = False
 LOG_FILE = os.path.join(ACCURACY_RESULTS_PATH, f"{time.strftime('%Y%m%d-%H%M%S')}_accuracies_{TEST_SET.lower()}.log")
