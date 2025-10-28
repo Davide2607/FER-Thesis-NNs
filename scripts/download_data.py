@@ -1,0 +1,38 @@
+import gdown
+import zipfile
+import os
+import shutil
+
+STEPS = {
+    "DOWNLOAD": False,
+    "EXTRACT": True,
+    "MOVE": True,
+}
+
+if __name__ == "__main__":
+    output = "data.zip"
+    
+    if STEPS["DOWNLOAD"]:
+        url = "https://drive.google.com/uc?id=1HFdR2lWlECHSUEgwiueuI7Txgehd88v2&export=download"
+        gdown.download(url, output, quiet=False)
+
+    # Extract the ZIP file if it exists
+    if os.path.exists(output):
+        if STEPS["EXTRACT"]:
+            print(f">> Extracting {output}...")
+            with zipfile.ZipFile(output, 'r') as zip_ref:
+                zip_ref.extractall("data")
+            print("<< Extraction complete.")
+        if STEPS["MOVE"]:
+            print(">> Moving up for cleanliness...")
+            extracted_folder = os.path.join("data", "data")
+            temp_destination = "data_temp"
+            desired_destination = "data"
+            shutil.move(extracted_folder, temp_destination)
+            # rename temp_destination to desired_destination
+            if os.path.exists(desired_destination):
+                shutil.rmtree(desired_destination)
+            shutil.move(temp_destination, desired_destination)
+            print("<< Move complete.")
+    else:
+        print("Download failed or file not found.")

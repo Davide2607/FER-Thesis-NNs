@@ -22,18 +22,4 @@ echo "==========================================================================
 cd /home/dbuhnila/models/FER-Thesis-NNs
 pwd
 
-# Define the Google Drive file ID and output file name
-FILE_ID="1tkWnzQVDiWGN3Ofjf33IbL-ZxSr-2ncE"
-OUTPUT="data.zip"
-
-# Download the file using curl
-curl -L -o "${OUTPUT}" "https://drive.google.com/uc?export=download&id=${FILE_ID}"
-
-# Check if the download was successful
-if [ $? -eq 0 ]; then
-    echo "Download successful. Extracting ${OUTPUT}..."
-    unzip "${OUTPUT}" -d "data"
-    echo "Extraction complete."
-else
-    echo "Download failed. Please check the file permissions or your internet connection."
-fi
+python scripts/download_data.py

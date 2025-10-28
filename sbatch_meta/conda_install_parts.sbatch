@@ -21,7 +21,7 @@ python -c "import sys; print('Python executable:', sys.executable); print('Envir
 echo "=========================================================================="
 
 
-python -m pip install h5py "numpy>=1.23.5,<2.0.0" Pillow scikit-learn ultralytics
+python -m pip install gdown
 echo "=========================================================================="
 echo "Installed other dependencies! (h5, np, PIL, skl, ultralytics)"
 echo "=========================================================================="

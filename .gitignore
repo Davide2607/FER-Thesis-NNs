@@ -3,6 +3,7 @@
 /modules/__pycache__/config.cpython-311.pyc
 /results_heavy/*
 !/results_heavy/placeholder
+/downloads/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
