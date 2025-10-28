@@ -116,7 +116,7 @@ def load_model(model_name, model_path_subset):
         return load_model_efficientnet(model_name, model_path_subset, custom_objects)
 
     if "yolo" in model_name:
-        return YOLO("/content/drive/MyDrive/Colab Notebooks/HPC/finale/yolov8n/yolov8n3/weights/last.pt")
+        return YOLO(model_path_subset[model_name])
     
     # For other models. Probably: resnet, vgg, inception, convnext, pattlite
     with keras.utils.custom_object_scope(custom_objects):
