@@ -18,13 +18,15 @@ EMOTIONS_PRED = {
 # 2a) Datasets paths
 DATASETS_PATH = os.path.join(DATA_BASE_DIR, "datasets")
 
+ADELE_TEST_SET_BASE_PATH = os.path.join(DATASETS_PATH, "adele_test_set")
+ADELE_TEST_SET_H5_PATH = os.path.join(ADELE_TEST_SET_BASE_PATH, "adele_test_set.h5")
+ADELE_TEST_SET_YAML_PATH = os.path.join(ADELE_TEST_SET_BASE_PATH, "adele_test_set_yaml")
+
 OCCLUDED_TEST_SET_BASE_PATH = os.path.join(DATASETS_PATH, "occluded_test_set")
 OCCLUDED_TEST_SET_H5_PATH = os.path.join(OCCLUDED_TEST_SET_BASE_PATH, "occluded_test_set.h5")
 OCCLUDED_TEST_SET_PATH = os.path.join(OCCLUDED_TEST_SET_BASE_PATH, "bosphorus_test_HQ")
 OCCLUDED_TEST_SET_RESIZED_PATH = os.path.join(OCCLUDED_TEST_SET_BASE_PATH, "output_images_testset_resized")
-
-ADELE_TEST_SET_BASE_PATH = os.path.join(DATASETS_PATH, "adele_test_set")
-ADELE_TEST_SET_H5_PATH = os.path.join(ADELE_TEST_SET_BASE_PATH, "adele_test_set.h5")
+OCCLUDED_TEST_SET_YAML_PATH = os.path.join(OCCLUDED_TEST_SET_BASE_PATH, "occluded_test_set_yaml")
 
 # 2b) Results paths
 RESULTS_LIGHT_PATH = os.path.join(".", "results_light")
@@ -34,7 +36,8 @@ ACCURACY_RESULTS_PATH = os.path.join(RESULTS_LIGHT_PATH, "accuracy_results")
 
 # 3) Model paths
 MODELS_PATH = os.path.join(DATA_BASE_DIR, "models")
-FINETUNING_MODELS_FOLDER = os.path.join(MODELS_PATH, "federica", "finetuning")
+FEDERICA_MODELS_FOLDER = os.path.join(MODELS_PATH, "federica")
+FINETUNING_MODELS_FOLDER = os.path.join(FEDERICA_MODELS_FOLDER, "finetuning")
 ALL_MODELS_PATHS = {
     "resnet_finetuning": os.path.join(FINETUNING_MODELS_FOLDER, "pretrained_ResNet_finetuning"),
     "pattlite_finetuning": os.path.join(FINETUNING_MODELS_FOLDER, "pretrained_PattLite_finetuning"),
@@ -42,6 +45,7 @@ ALL_MODELS_PATHS = {
     "inceptionv3_finetuning": os.path.join(FINETUNING_MODELS_FOLDER, "pretrained_InceptionV3_finetuning"),
     "convnext_finetuning": os.path.join(FINETUNING_MODELS_FOLDER, "pretrained_ConvNeXt_finetuning"),
     "efficientnet_finetuning": os.path.join(FINETUNING_MODELS_FOLDER, "pretrained_EfficientNetB1_finetuning_weights.h5"),
+    "yolo_last": os.path.join(FEDERICA_MODELS_FOLDER, 'yolo_last.pt'),
 }
 
 
