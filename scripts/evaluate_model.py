@@ -30,9 +30,9 @@ PATHS = {
 
 # ============== MACROS ===============
 MODEL_PATHS_SUBSET = ALL_MODELS_PATHS
-TEST_SET = "OCCLUDED"  # Options: "ADELE", "OCCLUDED"
-MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning"]
-# MODELS_NAMES = ["yolo_last"]
+TEST_SET = "ADELE"  # Options: "ADELE", "OCCLUDED"
+# MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning", "yolo_last"]
+MODELS_NAMES = ["yolo_last"]
 
 REDIRECT_OUTPUT = False
 LOG_FILE = os.path.join(ACCURACY_RESULTS_PATH, f"{time.strftime('%Y%m%d-%H%M%S')}_accuracies_{TEST_SET.lower()}.log")
@@ -90,12 +90,14 @@ def evaluate_yolo_model(model, test_generator):
         else:
             X_for_model = X.astype(np.uint8)
 
+        X_as_list = [X_for_model[i] for i in range(X_for_model.shape[0])]
+
         # Run prediction (ultralytics handles batching)
-        results = model.predict(source=X_for_model, imgsz=128, device=None, verbose=False)
+        results = model.predict(source=X_as_list, imgsz=128, device=None, verbose=False)
 
         # results is iterable of per-image Result objects
         batch_preds = []
-        for res in results[0].boxes:
+        for res in results:
             # classification model: Results.probs (per-class probabilities)
             probs = getattr(res, "probs", None)
             if probs is not None:
