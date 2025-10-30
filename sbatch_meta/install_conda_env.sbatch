@@ -2,12 +2,11 @@
 #SBATCH --job-name=dbuhnila/tesi
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ppp36213@gmail.com
-#SBATCH --partition=gpu_v100
-#SBATCH --time=00:10:00
+#SBATCH --partition=cpu_skylake
+#SBATCH --time=00:40:00
 #SBATCH --nodes=1
-#SBATCH --mem=1G
+#SBATCH --mem=100M
 #SBATCH --ntasks-per-node=1
-#SBATCH --gres=gpu:1
 #SBATCH --output=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 #SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 
@@ -40,6 +39,16 @@ echo "==========================================================================
 echo "Upgraded pip!"
 echo "=========================================================================="
 
+conda install nvidia/label/cuda-12.2.0::cuda-toolkit
+echo "=========================================================================="
+echo "Installed cudatoolkit 12.2"
+echo "=========================================================================="
+
+conda install -y cudnn=8.9 -c conda-forge
+echo "=========================================================================="
+echo "Installed cudnn 8.9"
+echo "=========================================================================="
+
 python -m pip install tensorflow-io-gcs-filesystem==0.31.0
 echo "=========================================================================="
 echo "Installed tf io-gs-fs!"
@@ -56,4 +65,5 @@ echo "Installed other dependencies! (h5, np, PIL, skl, ultralytics)"
 echo "=========================================================================="
 
 
+python -c "import sys; print('Python executable:', sys.executable); print('Environment:', sys.prefix)"
 python -c "import tensorflow as tf; print('tf',tf.__version__); print(tf.sysconfig.get_build_info()); print('gpus:', tf.config.list_physical_devices('GPU'))"

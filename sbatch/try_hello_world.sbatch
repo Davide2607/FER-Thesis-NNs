@@ -2,15 +2,34 @@
 #SBATCH --job-name=dbuhnila/tesi
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ppp36213@gmail.com
-#SBATCH --partition=cpu_skylake
-#SBATCH --time=00:01:00
+#SBATCH --partition=gpu_v100
+#SBATCH --time=00:02:00
 #SBATCH --nodes=1
-#SBATCH --mem=100M
+#SBATCH --mem=1G
 #SBATCH --ntasks-per-node=1
+#SBATCH --gres=gpu:1
 #SBATCH --output=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 #SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
+
+module load miniconda3/3.13.25
+module load nvhpc-hpcx-cuda12/25.1
+
+echo "cuda version:"
+nvcc --version
+echo "cuda library path:"
+echo $LD_LIBRARY_PATH
+
+source activate base
+conda activate fer-thesis
+echo "=========================================================================="
+echo "Activated venv!"
+python -c "import sys; print('Python executable:', sys.executable); print('Environment:', sys.prefix)"
+python -c "import tensorflow as tf; print('GPUs available:' + str(tf.config.list_physical_devices('GPU')) if tf.config.list_physical_devices('GPU') else 'No GPUs available')"
+echo "=========================================================================="
+
+cd /home/dbuhnila/models/FER-Thesis-NNs
+pwd
 
 echo "running python ./scripts/hello_world.py"
 cd /home/dbuhnila/models/FER-Thesis-NNs/scripts
 python hello_world.py
-

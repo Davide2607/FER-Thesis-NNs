@@ -3,7 +3,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ppp36213@gmail.com
 #SBATCH --partition=gpu_v100
-#SBATCH --time=00:10:00
+#SBATCH --time=00:20:00
 #SBATCH --nodes=1
 #SBATCH --mem=1G
 #SBATCH --ntasks-per-node=1
@@ -15,14 +15,15 @@ module load miniconda3/3.13.25
 
 source activate base
 conda activate fer-thesis
+# export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
 echo "=========================================================================="
 echo "Activated venv!"
 python -c "import sys; print('Python executable:', sys.executable); print('Environment:', sys.prefix)"
-python -c "import tensorflow as tf; print('GPUs available:' if tf.config.list_physical_devices('GPU') else 'No GPUs available')"
+python -c "import tensorflow as tf; print('tf',tf.__version__); print(tf.sysconfig.get_build_info()); print('gpus:', tf.config.list_physical_devices('GPU'))"
 echo "=========================================================================="
 
 cd /home/dbuhnila/models/FER-Thesis-NNs
 pwd
 
-python ./scripts/evaluate_model.py "ADELE"
-python ./scripts/evaluate_model.py "OCCLUDED"
+# python ./scripts/evaluate_model.py "ADELE"
+# python ./scripts/evaluate_model.py "OCCLUDED"
