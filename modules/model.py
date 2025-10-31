@@ -6,7 +6,6 @@ from tensorflow.keras.layers import Layer, GlobalAveragePooling2D, Dropout, Dens
 from tensorflow.keras.models import Model
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.initializers import Constant
-from ultralytics import YOLO
 
 
 from modules.config import EMOTIONS
@@ -116,6 +115,9 @@ def load_model(model_name, model_path_subset):
         return load_model_efficientnet(model_name, model_path_subset, custom_objects)
 
     if "yolo" in model_name:
+        # Import ultralytics lazily to avoid pulling in PyTorch/CUDA at module import time
+        # which can conflict with TensorFlow's GPU initialization.
+        from ultralytics import YOLO
         return YOLO(model_path_subset[model_name])
     
     # For other models. Probably: resnet, vgg, inception, convnext, pattlite
