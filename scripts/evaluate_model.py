@@ -11,6 +11,7 @@ from modules.config import  ACCURACY_RESULTS_PATH, ALL_MODELS_PATHS, \
 from modules.data import generate_h5_from_images, load_data_generator
 from modules.model import load_model
 
+# ============== MACROS ===============
 
 PATHS = {
     "ADELE": {
@@ -27,33 +28,18 @@ PATHS = {
     }
 }
 
-
-# ============== MACROS ===============
 MODEL_PATHS_SUBSET = ALL_MODELS_PATHS
 TEST_SET = "ADELE"  # Options: "ADELE", "OCCLUDED"
-MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning", "yolo_last"]
-# MODELS_NAMES = ["yolo_last"]
+# MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning", "yolo_last"]
+MODELS_NAMES = ["resnet_finetuning"]
 
 REDIRECT_OUTPUT = False
 LOG_FILE = os.path.join(ACCURACY_RESULTS_PATH, f"{time.strftime('%Y%m%d-%H%M%S')}_accuracies_{TEST_SET.lower()}.log")
 # =========== END OF MACROS ===========
 
 
-if REDIRECT_OUTPUT:
-    sys.stdout = open(LOG_FILE, "w")
-    sys.stderr = sys.stdout
-
-# Check if GPU is available
-physical_devices = tf.config.list_physical_devices('GPU')
-if physical_devices:
-    print(f"GPUs detected: {len(physical_devices)}")
-    for gpu in physical_devices:
-        print(f" - {gpu}")
-    # Set memory growth to avoid allocation issues
-    for gpu in physical_devices:
-        tf.config.experimental.set_memory_growth(gpu, True)
-else:
-    print("No GPU detected. The code will run on the CPU.")
+# ============== Functions ===============
+# will move these to modules/model.py asap
 
 def evaluate_yolo_model(model, test_generator):
     """Evaluate an Ultralytics YOLO model manually over a Keras-style generator.
@@ -126,6 +112,35 @@ def evaluate_model(model, model_name, test_generator):
         test_loss = -1.0 
     return test_loss, test_acc
 
+# =========== End Of Functions ===========
+
+
+# ================= Global ==================
+
+if REDIRECT_OUTPUT:
+    sys.stdout = open(LOG_FILE, "w")
+    sys.stderr = sys.stdout
+
+# Print the LD_LIBRARY_PATH environment variable
+ld_library_path = os.environ.get('LD_LIBRARY_PATH', 'Not set')
+print(f"LD_LIBRARY_PATH: {ld_library_path}")
+
+# Check if GPU is available
+physical_devices = tf.config.list_physical_devices('GPU')
+if physical_devices:
+    print(f"GPUs detected: {len(physical_devices)}")
+    for gpu in physical_devices:
+        print(f" - {gpu}")
+    # Set memory growth to avoid allocation issues
+    for gpu in physical_devices:
+        tf.config.experimental.set_memory_growth(gpu, True)
+else:
+    print("No GPU detected. The code will run on the CPU.")
+
+# =================== End Of Global =====================
+
+
+# ================= Main ==================
 
 if __name__ == "__main__":
     # 0) Setup macros as args

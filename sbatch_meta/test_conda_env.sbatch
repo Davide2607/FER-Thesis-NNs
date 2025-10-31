@@ -2,12 +2,11 @@
 #SBATCH --job-name=dbuhnila/tesi
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ppp36213@gmail.com
-#SBATCH --partition=gpu_v100
-#SBATCH --time=00:02:00
+#SBATCH --partition=cpu_skylake
+#SBATCH --time=00:10:00
 #SBATCH --nodes=1
 #SBATCH --mem=100M
 #SBATCH --ntasks-per-node=1
-#SBATCH --gres=gpu:1
 #SBATCH --output=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 #SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 
@@ -25,5 +24,7 @@ conda activate fer-thesis
 # python -c "import tensorflow as tf; print('GPUs available:' + str(tf.config.list_physical_devices('GPU')) if tf.config.list_physical_devices('GPU') else 'No GPUs available')"
 # echo "=========================================================================="
 
-nvcc --version
-cat $CONDA_PREFIX/include/cudnn_version.h | grep CUDNN_MAJOR -A 2
+# nvcc --version
+# cat $CONDA_PREFIX/include/cudnn_version.h | grep CUDNN_MAJOR -A 2
+
+conda list
