@@ -4,6 +4,7 @@
 /results_heavy/*
 !/results_heavy/placeholder
 /downloads/*
+/out_err/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
