@@ -45,7 +45,7 @@ ALL_MODELS_PATHS = {
     "inceptionv3_finetuning": os.path.join(FINETUNING_MODELS_FOLDER, "pretrained_InceptionV3_finetuning"),
     "convnext_finetuning": os.path.join(FINETUNING_MODELS_FOLDER, "pretrained_ConvNeXt_finetuning"),
     "efficientnet_finetuning": os.path.join(FINETUNING_MODELS_FOLDER, "pretrained_EfficientNetB1_finetuning_weights.h5"),
-    "yolo_last": os.path.join(FEDERICA_MODELS_FOLDER, 'yolo_last.pt'),
+    "yolo_last": os.path.join(FEDERICA_MODELS_FOLDER, 'last.pt'),
 }
 
 
