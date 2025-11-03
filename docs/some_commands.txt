@@ -1,0 +1,8 @@
+# Requirements
+python -m pip freeze > pipfreeze_requirements.txt
+conda list > condalist_requirements.txt
+
+# Delete Conda Env
+conda deactivate
+conda env remove -n fer-thesis -y
+conda env list
