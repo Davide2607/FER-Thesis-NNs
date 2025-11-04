@@ -14,7 +14,7 @@
 
 
 # =====================================================================================
-# ============================= Load And Activate =====================================
+# ============================= Preliminary Setups ====================================
 # =====================================================================================
 
 module load miniconda3/3.13.25
@@ -22,55 +22,8 @@ module load miniconda3/3.13.25
 source activate base
 conda activate fer-thesis
 
-
-
-# =====================================================================================
-# ================================= Set Path ==========================================
-# =====================================================================================
-
-## Ensure CUDA / libdevice visible to XLA and Python
-# Prefer conda env libs but make sure CUDA toolkit lib paths come first
 export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-
-# Try to discover CUDA root (where nvcc lives) and set CUDA_HOME
-CUDA_HOME=""
-if command -v nvcc >/dev/null 2>&1; then
-	# resolve nvcc location and go two levels up to get CUDA root
-	nvcc_path=$(readlink -f "$(command -v nvcc)")
-	CUDA_HOME=$(dirname "$(dirname "$nvcc_path")")
-fi
-
-# Fallback to common system locations if nvcc not in PATH
-if [ -z "$CUDA_HOME" ]; then
-	for cand in /usr/local/cuda-12.2 /usr/local/cuda /share/apps/hpc_sdk/*/cuda /opt/cuda; do
-		if [ -d "$cand" ]; then
-			CUDA_HOME="$cand"
-			break
-		fi
-	done
-fi
-
-if [ -n "$CUDA_HOME" ]; then
-	export CUDA_HOME
-	export PATH="$CUDA_HOME/bin:$PATH"
-	export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"
-fi
-
-# Find libdevice (.bc) used by XLA and point XLA_FLAGS to it so JIT can compile
-LIBDEVICE_DIR=""
-for maybe in "$CUDA_HOME"/nvvm/libdevice "$CUDA_HOME"/nvvm/libdevice/* "$CONDA_PREFIX"/lib/python*/site-packages/tensorflow/**/cuda_nvcc; do
-	if compgen -G "$maybe/libdevice*.bc" >/dev/null 2>&1; then
-		LIBDEVICE_DIR=$(dirname "$(compgen -G "$maybe/libdevice*.bc" | head -n1)")
-		break
-	fi
-done
-
-if [ -n "$LIBDEVICE_DIR" ]; then
-	export XLA_FLAGS="--xla_gpu_cuda_data_dir=$LIBDEVICE_DIR"
-	echo "Set XLA_FLAGS=$XLA_FLAGS"
-else
-	echo "Warning: libdevice not found; XLA JIT may fail. Searched CUDA_HOME=$CUDA_HOME and CONDA_PREFIX=$CONDA_PREFIX"
-fi
+export XLA_FLAGS="--xla_gpu_cuda_data_dir=/home/dbuhnila/.conda/envs/fer-thesis"
 
 
 

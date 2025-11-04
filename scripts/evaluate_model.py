@@ -30,8 +30,8 @@ PATHS = {
 
 MODEL_PATHS_SUBSET = ALL_MODELS_PATHS
 TEST_SET = "ADELE"  # Options: "ADELE", "OCCLUDED"
-# MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning", "yolo_last"]
-MODELS_NAMES = ["resnet_finetuning"]
+MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning", "yolo_last"]
+# MODELS_NAMES = ["resnet_finetuning"]
 
 REDIRECT_OUTPUT = False
 LOG_FILE = os.path.join(ACCURACY_RESULTS_PATH, f"{time.strftime('%Y%m%d-%H%M%S')}_accuracies_{TEST_SET.lower()}.log")

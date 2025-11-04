@@ -12,3 +12,13 @@
 
 
 922588 -> cpu run just for yolo, with the new weights (last.pt instead of yolo_last.pt, which I have even removed) -> canaglia dio viene comunque 0.69 che non centra niente col valore atteso .
+
+
+
+930510 -> exporting LD and also doing the patatrac for exporting libdevice -> FAIL (libdevice not found)
+930512 -> commenting all of the LD and libdevice export code -> FAIL (no gpu detected)
+930513 -> commnting only LD but leaving libdevice -> FAIL (no gpu detected)
+
+
+
+930513 -> export XLA_FLAGS =========> FINALLY WORKS!

@@ -2,42 +2,24 @@
 #SBATCH --job-name=dbuhnila/tesi
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ppp36213@gmail.com
-#SBATCH --partition=gpu_v100
+#SBATCH --partition=cpu_skylake
 #SBATCH --time=00:10:00
 #SBATCH --nodes=1
-#SBATCH --mem=1G
+#SBATCH --mem=100M
 #SBATCH --ntasks-per-node=1
-#SBATCH --gres=gpu:1
 #SBATCH --output=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 #SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 
 
 
 # =====================================================================================
-# ============================= Load And Activate =====================================
+# ============================= Preliminary Setups ====================================
 # =====================================================================================
 
 module load miniconda3/3.13.25
 
 source activate base
 conda activate fer-thesis
-
-
-
-
-# =====================================================================================
-# ================================= Set Path ==========================================
-# =====================================================================================
-
-## Ensure CUDA / libdevice visible to XLA and Python
-# Prefer conda env libs but make sure CUDA toolkit lib paths come first
-export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-
-
-
-# =====================================================================================
-# =================================== Run Code ========================================
-# =====================================================================================
 
 echo "=========================================================================="
 echo "Activated venv!"
@@ -48,6 +30,11 @@ echo "==========================================================================
 cd /home/dbuhnila/models/FER-Thesis-NNs
 pwd
 
+
+
+# =====================================================================================
+# =================================== Run Code ========================================
+# =====================================================================================
 
 
 
@@ -71,10 +58,19 @@ fi
 # Also copy the sbatch script used (helpful for provenance)
 cp "${SLURM_SUBMIT_DIR:-/home/dbuhnila/models/FER-Thesis-NNs}/sbatch/evaluate_model_gpu.sbatch" "$DEST_DIR/" 2>/dev/null || true
 
-# Optional: create a small tarball of the current working tree (no .git)
-# Useful if you want the exact code snapshot present at runtime.
-SNAP_TAR="$DEST_DIR/code_snapshot_${TS}.tar.gz"
-tar --exclude='.git' -czf "$SNAP_TAR" -C /home/dbuhnila/models/FER-Thesis-NNs . || true
+# Create a zip with all the code inside of scripts and modules
+# Prefer zip if available, otherwise fall back to tar.gz
+CODE_ARCHIVE="$DEST_DIR/code_$(date +%Y%m%d-%H%M%S).zip"
+ROOT_DIR="/home/dbuhnila/models/FER-Thesis-NNs"
+if command -v zip >/dev/null 2>&1; then
+  echo "Creating ZIP archive $CODE_ARCHIVE (scripts/ + modules/)"
+  (cd "$ROOT_DIR" && zip -r "$CODE_ARCHIVE" scripts modules -x "*.git*" "*/__pycache__/*") >/dev/null 2>&1 || echo "zip failed"
+else
+  # fallback to tar.gz
+  CODE_TAR="${CODE_ARCHIVE%.zip}.tar.gz"
+  echo "zip not found, creating tarball $CODE_TAR"
+  tar -C "$ROOT_DIR" -czf "$CODE_TAR" scripts modules --exclude='.git' --exclude='*/__pycache__' || echo "tar failed"
+fi
 
 # Create a provenance file
 PROV="$DEST_DIR/provenance.txt"

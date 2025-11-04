@@ -11,22 +11,38 @@
 #SBATCH --output=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 #SBATCH --error=/home/dbuhnila/models/FER-Thesis-NNs/out_err/train_%j.log
 
+# =====================================================================================
+# ============================= Preliminary Setups ====================================
+# =====================================================================================
+
 module load miniconda3/3.13.25
 
 source activate base
 conda activate fer-thesis
+
+export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
+export XLA_FLAGS="--xla_gpu_cuda_data_dir=/home/dbuhnila/.conda/envs/fer-thesis"
+
 echo "=========================================================================="
 echo "Activated venv!"
 python -c "import sys; print('Python executable:', sys.executable); print('Environment:', sys.prefix)"
-python -c "import tensorflow as tf; print('GPUs available:' + str(tf.config.list_physical_devices('GPU')) if tf.config.list_physical_devices('GPU') else 'No GPUs available')"
+python -c "import tensorflow as tf; print('tf',tf.__version__); print(tf.sysconfig.get_build_info()); print('gpus:', tf.config.list_physical_devices('GPU'))"
 echo "=========================================================================="
 
 cd /home/dbuhnila/models/FER-Thesis-NNs
 pwd
 
+
+
+# =====================================================================================
+# =================================== Run Code ========================================
+# =====================================================================================
+
 echo "running python ./scripts/hello_world.py"
 cd /home/dbuhnila/models/FER-Thesis-NNs/scripts
 python hello_world.py
+
+
 
 # =====================================================================================
 # ============================= Copy Logs Outside =====================================
