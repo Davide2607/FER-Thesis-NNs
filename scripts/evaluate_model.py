@@ -35,6 +35,8 @@ MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", 
 
 REDIRECT_OUTPUT = False
 LOG_FILE = os.path.join(ACCURACY_RESULTS_PATH, f"{time.strftime('%Y%m%d-%H%M%S')}_accuracies_{TEST_SET.lower()}.log")
+
+DEBUG = True
 # =========== END OF MACROS ===========
 
 
@@ -168,8 +170,13 @@ if __name__ == "__main__":
         print("======================================")
         print(f"Evaluating model: {model_name}")
 
+        if DEBUG:
+            print(f"GPUs: {tf.config.list_physical_devices('GPU')}")
+
         # a) Load the model
         model = load_model(model_name, MODEL_PATHS_SUBSET)
+        if DEBUG:
+            print(f"GPUs: {tf.config.list_physical_devices('GPU')}")
         if model is None:
             print("Model loading not implemented for this model type.")
             continue
