@@ -105,7 +105,7 @@ def build_model_final_layers(learning_rate, dropout_rate, l2_reg, initial_bias, 
 
     return model
 
-def load_model(model_name, model_path_subset):
+def load_model(model_name, model_path_subset, debug=False):
     custom_objects = {'loss': categorical_focal_loss()}
 
     if not model_name in model_path_subset.keys():
@@ -118,7 +118,11 @@ def load_model(model_name, model_path_subset):
         # Import ultralytics lazily to avoid pulling in PyTorch/CUDA at module import time
         # which can conflict with TensorFlow's GPU initialization.
         from ultralytics import YOLO
-        return YOLO(model_path_subset[model_name])
+        import torch
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if debug:
+            print(f"Loading YOLO model on device: {device}")
+        return YOLO(model_path_subset[model_name]).to(device)
     
     # For other models. Probably: resnet, vgg, inception, convnext, pattlite
     with keras.utils.custom_object_scope(custom_objects):

@@ -4,9 +4,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import time
 import tensorflow as tf
 import numpy as np
+from sklearn.metrics import accuracy_score
 
 from modules.config import  ACCURACY_RESULTS_PATH, ALL_MODELS_PATHS, \
-                            ADELE_TEST_SET_H5_PATH, ADELE_TEST_SET_YAML_PATH, \
+                            ADELE_TEST_SET_H5_PATH, ADELE_TEST_SET_YAML_PATH, EMOTIONS, \
                             OCCLUDED_TEST_SET_H5_PATH, OCCLUDED_TEST_SET_YAML_PATH, OCCLUDED_TEST_SET_PATH, OCCLUDED_TEST_SET_RESIZED_PATH 
 from modules.data import generate_h5_from_images, load_data_generator
 from modules.model import load_model
@@ -49,59 +50,50 @@ def evaluate_yolo_model(model, test_generator):
     Returns (loss, accuracy). Only accuracy is computed; loss is returned
     as None (placeholder) since you only care about accuracy.
     """
-    total_samples = 0
-    correct = 0
-
-    # Ensure generator iterator state is reset
+    # 0) Ensure generator iterator state is reset
     try:
         iter(test_generator)
     except Exception:
         pass
 
+    categories = EMOTIONS
+    pred_labels = []
+    true_labels = []
+
     for batch in test_generator:
-        # generator yields (X_batch, y_batch)
+        # 1) generator yields (X_batch, y_batch)
         if isinstance(batch, (list, tuple)) and len(batch) >= 2:
             X_batch, y_batch = batch[0], batch[1]
         else:
             raise ValueError("test_generator must yield (X_batch, y_batch) tuples")
 
-        # Convert y_batch to integer labels
-        if y_batch.ndim > 1 and y_batch.shape[-1] > 1:
-            y_int = np.argmax(y_batch, axis=1)
-        else:
-            y_int = np.array(y_batch).astype(int).reshape(-1)
-
-        # Prepare images for ultralytics (uint8 0-255)
+        # 1a) Prepare images for ultralytics (uint8 0-255)
         X = np.array(X_batch)
         if np.issubdtype(X.dtype, np.floating):
             X_for_model = (np.clip(X, 0, 1) * 255).astype(np.uint8)
         else:
             X_for_model = X.astype(np.uint8)
 
+            
+        # 1b) Convert y_batch to integer labels
+        if y_batch.ndim > 1 and y_batch.shape[-1] > 1:
+            y_int = np.argmax(y_batch, axis=1)
+        else:
+            y_int = np.array(y_batch).astype(int).reshape(-1)
+
         X_as_list = [X_for_model[i] for i in range(X_for_model.shape[0])]
 
-        # Run prediction (ultralytics handles batching)
+        # 2) Run prediction 
         results = model.predict(source=X_as_list, imgsz=128, device=None, verbose=False)
+        
+        # 3) Save predictions and labels
+        pred_labels.extend([result.probs.top1 for result in results])
+        true_labels.extend(y_int.tolist())
 
-        # results is iterable of per-image Result objects
-        batch_preds = []
-        for res in results:
-            # classification model: Results.probs (per-class probabilities)
-            probs = getattr(res, "probs", None)
-            if probs is not None:
-                pred = probs.top1
-                batch_preds.append(pred)
+    # 4) Compute accuracy
+    accuracy = accuracy_score(true_labels, pred_labels)
 
-        batch_preds = np.array(batch_preds, dtype=int)
-        n = len(y_int)
-        # Safety: if predictions count differs from labels, truncate
-        if batch_preds.shape[0] != n:
-            batch_preds = batch_preds[:n]
-
-        total_samples += n
-        correct += int((batch_preds == y_int).sum())
-
-    accuracy = correct / total_samples if total_samples > 0 else 0.0
+    # 5) Return None for loss (not computed), and accuracy
     return None, accuracy
 
 def evaluate_model(model, model_name, test_generator):
@@ -174,7 +166,7 @@ if __name__ == "__main__":
             print(f"GPUs: {tf.config.list_physical_devices('GPU')}")
 
         # a) Load the model
-        model = load_model(model_name, MODEL_PATHS_SUBSET)
+        model = load_model(model_name, MODEL_PATHS_SUBSET, debug=DEBUG)
         if DEBUG:
             print(f"GPUs: {tf.config.list_physical_devices('GPU')}")
         if model is None:
