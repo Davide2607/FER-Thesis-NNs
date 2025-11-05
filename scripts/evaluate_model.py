@@ -1,29 +1,31 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import time
 import tensorflow as tf
-import numpy as np
-from sklearn.metrics import accuracy_score
 
 from modules.config import  ACCURACY_RESULTS_PATH, ALL_MODELS_PATHS, \
-                            ADELE_TEST_SET_H5_PATH, ADELE_TEST_SET_YAML_PATH, EMOTIONS, \
+                            ADELE_TEST_SET_H5_PATH, ADELE_TEST_SET_YAML_PATH, ADELE_TEST_SET_PATH, \
                             OCCLUDED_TEST_SET_H5_PATH, OCCLUDED_TEST_SET_YAML_PATH, OCCLUDED_TEST_SET_PATH, OCCLUDED_TEST_SET_RESIZED_PATH 
-from modules.data import generate_h5_from_images, load_data_generator
+from modules.data import load_data_generator
 from modules.model import load_model
+from modules.eval import evaluate_model
+
+
 
 # ============== MACROS ===============
 
 PATHS = {
     "ADELE": {
-        "test_set": None,
-        "test_set_resized": None,
+        "test_set_big": None,
+        "test_set_small": ADELE_TEST_SET_PATH,
         "test_set_h5": ADELE_TEST_SET_H5_PATH,
         "test_set_yaml": ADELE_TEST_SET_YAML_PATH,
     },
     "OCCLUDED": {
-        "test_set": OCCLUDED_TEST_SET_PATH,
-        "test_set_resized": OCCLUDED_TEST_SET_RESIZED_PATH,
+        "test_set_big": OCCLUDED_TEST_SET_PATH,
+        "test_set_small": OCCLUDED_TEST_SET_RESIZED_PATH,
         "test_set_h5": OCCLUDED_TEST_SET_H5_PATH,
         "test_set_yaml": OCCLUDED_TEST_SET_YAML_PATH,
     }
@@ -31,82 +33,17 @@ PATHS = {
 
 MODEL_PATHS_SUBSET = ALL_MODELS_PATHS
 TEST_SET = "ADELE"  # Options: "ADELE", "OCCLUDED"
-MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning", "yolo_last"]
-# MODELS_NAMES = ["resnet_finetuning"]
+# MODELS_NAMES = ["resnet_finetuning", "pattlite_finetuning", "vgg19_finetuning", "inceptionv3_finetuning", "convnext_finetuning", "efficientnet_finetuning", "yolo_last"]
+MODELS_NAMES = ["yolo_last"]
 
 REDIRECT_OUTPUT = False
 LOG_FILE = os.path.join(ACCURACY_RESULTS_PATH, f"{time.strftime('%Y%m%d-%H%M%S')}_accuracies_{TEST_SET.lower()}.log")
 
 DEBUG = True
+YOLO_FOLDERS_INSTEAD_OF_GENERATOR = False  # only for YOLO models, to test accuracy issues
+
 # =========== END OF MACROS ===========
 
-
-# ============== Functions ===============
-# will move these to modules/model.py asap
-
-def evaluate_yolo_model(model, test_generator):
-    """Evaluate an Ultralytics YOLO model manually over a Keras-style generator.
-
-    Returns (loss, accuracy). Only accuracy is computed; loss is returned
-    as None (placeholder) since you only care about accuracy.
-    """
-    # 0) Ensure generator iterator state is reset
-    try:
-        iter(test_generator)
-    except Exception:
-        pass
-
-    categories = EMOTIONS
-    pred_labels = []
-    true_labels = []
-
-    for batch in test_generator:
-        # 1) generator yields (X_batch, y_batch)
-        if isinstance(batch, (list, tuple)) and len(batch) >= 2:
-            X_batch, y_batch = batch[0], batch[1]
-        else:
-            raise ValueError("test_generator must yield (X_batch, y_batch) tuples")
-
-        # 1a) Prepare images for ultralytics (uint8 0-255)
-        X = np.array(X_batch)
-        if np.issubdtype(X.dtype, np.floating):
-            X_for_model = (np.clip(X, 0, 1) * 255).astype(np.uint8)
-        else:
-            X_for_model = X.astype(np.uint8)
-
-            
-        # 1b) Convert y_batch to integer labels
-        if y_batch.ndim > 1 and y_batch.shape[-1] > 1:
-            y_int = np.argmax(y_batch, axis=1)
-        else:
-            y_int = np.array(y_batch).astype(int).reshape(-1)
-
-        X_as_list = [X_for_model[i] for i in range(X_for_model.shape[0])]
-
-        # 2) Run prediction 
-        results = model.predict(source=X_as_list, imgsz=128, device=None, verbose=False)
-        
-        # 3) Save predictions and labels
-        pred_labels.extend([result.probs.top1 for result in results])
-        true_labels.extend(y_int.tolist())
-
-    # 4) Compute accuracy
-    accuracy = accuracy_score(true_labels, pred_labels)
-
-    # 5) Return None for loss (not computed), and accuracy
-    return None, accuracy
-
-def evaluate_model(model, model_name, test_generator):
-    if "yolo" in model_name:
-        test_loss, test_acc = evaluate_yolo_model(model, test_generator)
-    else:
-        test_loss, test_acc = model.evaluate(test_generator)
-
-    if test_loss is None:
-        test_loss = -1.0 
-    return test_loss, test_acc
-
-# =========== End Of Functions ===========
 
 
 # ================= Global ==================
@@ -134,6 +71,7 @@ else:
 # =================== End Of Global =====================
 
 
+
 # ================= Main ==================
 
 if __name__ == "__main__":
@@ -148,9 +86,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # 1) Load the test set
-    # if you can't find the h5 file, generate it from the images
-    if not os.path.exists(PATHS[TEST_SET]["test_set_h5"]):
-        generate_h5_from_images(PATHS[TEST_SET]["test_set"], PATHS[TEST_SET]["test_set_resized"], PATHS[TEST_SET]["test_set_h5"])
+    # # if you can't find the h5 file, generate it from the images
+    # # ACTUALLY, JUST GENERATE IT BEFORE RUNNING THIS, I DON'T WANT POSSIBLE BUGS FROM THIS
+    # if not os.path.exists(PATHS[TEST_SET]["test_set_h5"]):
+    #     generate_h5_from_images(PATHS[TEST_SET]["test_set"], PATHS[TEST_SET]["test_set_resized"], PATHS[TEST_SET]["test_set_h5"])
     test_generator = load_data_generator(PATHS[TEST_SET]["test_set_h5"], 'test')
 
     print(f"Loaded {TEST_SET} test set with {len(test_generator.x_data)} samples.")
@@ -174,7 +113,12 @@ if __name__ == "__main__":
             continue
         else:
             # b) Evaluate the model
-            test_loss, test_acc = evaluate_model(model, model_name, test_generator)
+            if not YOLO_FOLDERS_INSTEAD_OF_GENERATOR or "yolo" not in model_name:
+                test_loss, test_acc = evaluate_model(model, model_name, test_generator, debug=DEBUG)
+            else:
+                # THIS EXISTS FOR YOLO. FOR NOW THE "CORRECT" VERSION IS THE ONE WITH FOLDERS
+                test_loss, test_acc = evaluate_model(model, model_name, None, PATHS[TEST_SET]["test_set_small"], debug=DEBUG)
+            
             models_results[model_name]["test_loss"] = test_loss
             models_results[model_name]["test_acc"] = test_acc
     print("======================================")

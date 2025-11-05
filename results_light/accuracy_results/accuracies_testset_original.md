@@ -8,7 +8,8 @@ Model: pattlite_finetuning - Test Loss: 0.1164, Test Accuracy: 0.7600
 Model: vgg19_finetuning - Test Loss: 0.1184, Test Accuracy: 0.7629
 Model: inceptionv3_finetuning - Test Loss: 0.1237, Test Accuracy: 0.7543
 Model: convnext_finetuning - Test Loss: 0.1226, Test Accuracy: 0.7829
-Model: yolo_last - Test Loss: -1.0000, Test Accuracy: 0.7314 (now even 69% with the new last.pt instead of yolo_last.pt aaaaaaaaaaaaa)
+Model: yolo_last - Test Loss: -1.0000, Test Accuracy: 0.7629 (RAN WITH evaluate_yolo_model_folders())
+Model: yolo_last - Test Loss: -1.0000, Test Accuracy: 0.6943 (RAN WITH evaluate_yolo_model_testgen())
 
 
 

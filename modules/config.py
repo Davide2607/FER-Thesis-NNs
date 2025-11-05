@@ -1,5 +1,6 @@
-# 1) Emotions
 import os
+
+# 1) Emotions
 DATA_BASE_DIR = os.path.join(".", "data")
 
 EMOTIONS = ["ANGRY", "DISGUST", "FEAR", "HAPPY", "NEUTRAL", "SAD", "SURPRISE"]
@@ -20,6 +21,7 @@ DATASETS_PATH = os.path.join(DATA_BASE_DIR, "datasets")
 
 ADELE_TEST_SET_BASE_PATH = os.path.join(DATASETS_PATH, "adele_test_set")
 ADELE_TEST_SET_H5_PATH = os.path.join(ADELE_TEST_SET_BASE_PATH, "adele_test_set.h5")
+ADELE_TEST_SET_PATH = os.path.join(ADELE_TEST_SET_BASE_PATH, "extracted_images")
 ADELE_TEST_SET_YAML_PATH = os.path.join(ADELE_TEST_SET_BASE_PATH, "adele_test_set_yaml")
 
 OCCLUDED_TEST_SET_BASE_PATH = os.path.join(DATASETS_PATH, "occluded_test_set")

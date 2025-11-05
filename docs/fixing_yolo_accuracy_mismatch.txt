@@ -1,0 +1,19 @@
+So first of all, I finally got the correct file, which is called last.pt instead of yolo_last.pt
+    - But it still yields a different accuracy value, namely 69% (on adele test set)
+
+Then I tried keeping my code and just using sklearn.metrics.accuracy but still the same result
+
+Then I tried implementing Federica's code exactly, i.e. using model.predict(f"some_folder_path") for each class folder, and it finally gave a different result, but it's 80% :((((
+
+I FOUND OUT! The bosphorus final folder has extra NEUTRAL things that break the final result. Using the images I extracted from Adele's h5 on the evaluate_yolo_folders() version of the evaluator yields 76% !!!! GG
+    - Now I need to understand why my results differed though
+
+
+
+NEXT STEPS:
+> for folders: write code as YOU would write it, and see if the result is the same
+    => DONE and OK, it's 76%, so now we have clean code
+> for testgen: run model.predict() with the same exact params (apart from folder ofc)
+    => DONE and OK, it's again 69%
+> see if the prediction are exactly the same between the two:
+    - i.e. just save them somewhere and compare them element by element (compare top1 first then if needed also the whole 7 probabilities)
