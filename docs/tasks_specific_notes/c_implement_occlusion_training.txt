@@ -1,0 +1,50 @@
+################ PLANNING ################ 
+> How should the validation be handled? Is usually validation constant throughout the whole training? I guess so.
+    - So I should just apply occlusions with the same seed
+    - Ratio for val should be 100% since the test set is 100% occluded
+
+> How to do the occlusions
+    - How to handle the ratio
+        = scheduled (increasing with time) -> see papers
+    - What type of occlusion?
+        = We'll definitely start with the ones like the test set
+            + Consider saving landmarks in the dataloader
+            + Compute the time needed to apply patches locally, then also during training (i.e. calculate normal training time and training with online augmentation that applies patches on landmarks)
+                * in order to see if online makes sense, or if approach makes sense
+        = Should we do negative occlusions too?
+            + Since the goal of the first training is to emulate real life learning of occlusions, I don't think it makes much sense, but I'll ask the prof.
+    - Eventually try another style of occlusion to see if domain shift occurs
+        = meaning different color or shape of the occlusion, not necessarily discarding landmark approach
+        = Actually could also mean using faceparts landmarks instead of AU landmarks, since the style of the test set is AU, and not faceparts
+    - How? 
+        + You can just create a layer and put it inside a keras.sequential which is what is used to apply augmentations
+            '''
+                class RandomOcclusion(keras.layers.Layer):
+                    ...
+
+                data_augmentation = keras.Sequential([
+                    keras.layers.RandomFlip("horizontal"),
+                    keras.layers.RandomRotation(0.1),
+                    RandomOcclusion(occlusion_probability=0.7)
+                ])
+
+                x = data_augmentation(inputs)
+            '''
+
+
+
+# plan
+
+what to do now?
+    first of all confirm what the models architecture is although I'm not sure it's completely necessary 
+    then just try and run the training
+
+
+
+
+
+
+
+
+# LANDMARKS
+when not loading them, they appear as a batch (usually 64) where each element is a list of tuples (of xy coordinates)

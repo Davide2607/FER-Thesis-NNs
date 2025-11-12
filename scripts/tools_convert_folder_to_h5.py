@@ -5,36 +5,39 @@ import h5py
 import numpy as np
 from PIL import Image
 
-from modules.config import OCCLUDED_TEST_SET_H5_PATH, OCCLUDED_TEST_SET_PATH, OCCLUDED_TEST_SET_RESIZED_PATH, \
+from modules.config import BOSPHORUS_TEST_HQ_H5_PATH, BOSPHORUS_TEST_HQ_IMAGES_PATH, OCCLUDED_TEST_SET_H5_PATH, OCCLUDED_TEST_SET_IMAGES_PATH, OCCLUDED_TEST_SET_RESIZED_PATH, \
                             ADELE_TEST_SET_H5_PATH
 
-# BOSPHORUS_TEST_FINALE_PATH = "C:\\Users\\Dragos\\Roba\\Lectures\\YM2.2\\Thesis\\e Models\\data\\datasets\\bosphorus_test_finale"
-# BOSPHORUS_TEST_FINALE_H5 = "C:\\Users\\Dragos\\Roba\\Lectures\\YM2.2\\Thesis\\e Models\\data\\datasets\\bosphorus_test_finale.h5"
 
-EXAMPLE_H5_PATH = os.path.join(".", "saliency_maps", "zzz_other_and_zips", "h5_files", "test_data_adele.h5")
-# test set folder contains subfolders for each class (ANGRY, DISGUST, ...) with inside images called like "bosphorus_bs001_ANGRY_30__masked-negative-DISGUST_mismatch.png"
+
+# ================================== MACROS ==================================
 
 JUST_CHECK_RESULT = True
-
-
-
-# TEST_PATH = BOSPHORUS_TEST_FINALE_PATH # OCCLUDED_TEST_SET_PATH, BOSPHORUS_TEST_FINALE
+IMAGES_FOLDER_PATH = BOSPHORUS_TEST_HQ_IMAGES_PATH # OCCLUDED_TEST_SET_PATH, BOSPHORUS_TEST_FINALE, BOSPHORUS_TEST_HQ_IMAGES_PATH
+RESIZE_TO_SMALL = False
 H5_PATH = ADELE_TEST_SET_H5_PATH  # OCCLUDED_TEST_SET_H5_PATH, EXAMPLE_H5_PATH
+
+# =============================== END OF MACROS ===============================
+
+
 
 if __name__ == "__main__":
     if not JUST_CHECK_RESULT:
         # 2) Generate new h5 with the contents of the test set
-        class_names = sorted(os.listdir(TEST_PATH))
+        class_names = sorted(os.listdir(IMAGES_FOLDER_PATH))
         paths = []
         X_test = []
         y_test = []
         for class_idx, class_name in enumerate(class_names):
-            class_folder = os.path.join(TEST_PATH, class_name)
+            class_folder = os.path.join(IMAGES_FOLDER_PATH, class_name)
             image_files = sorted(os.listdir(class_folder))
             for image_file in image_files:
                 image_path = os.path.join(class_folder, image_file)
                 # Load PNG image as RGB NumPy array and resize to (128, 128, 3)
-                image = np.array(Image.open(image_path).convert('RGB').resize((128, 128)))
+                if RESIZE_TO_SMALL:
+                    image = np.array(Image.open(image_path).convert('RGB').resize((128, 128)))
+                else:
+                    image = np.array(Image.open(image_path).convert('RGB'))
                 X_test.append(image)
                 y_test.append(class_idx)  # Store class index instead of name
                 paths.append(image_path)

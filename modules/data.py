@@ -1,13 +1,18 @@
+import hashlib
 import os
 import numpy as np
 from PIL import Image
 import h5py
 from sklearn.utils import shuffle
+import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras.utils import to_categorical, Sequence
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from modules.config import EMOTIONS
+from modules.landmark_utils import detect_facial_landmarks__batch, get_landmark_coordinate_sets_by_emotion__batch
+from modules.mask import apply_mask_to__batch
+
 
 
 def generate_h5_from_images(test_set_path, resized_path, h5_path):
@@ -65,17 +70,46 @@ def generate_h5_from_images(test_set_path, resized_path, h5_path):
             raise ValueError(f"Expected 7 classes, but found {len(class_names_loaded)}.")
         if len(paths_loaded) != 350:
             raise ValueError(f"Expected 350 paths, but found {len(paths_loaded)}.")
-    
+
+class RandomOcclusion(keras.layers.Layer):
+    def __init__(self, occlusion_probability=1.0, **kwargs):
+        super().__init__(**kwargs)
+        self.occlusion_probability = occlusion_probability
+
+    def call(self, images, labels, image_hashes, training=None):
+        if training is None:
+            training = keras.backend.learning_phase()
+
+        def occlude():
+            # images is a tf.Tensor:
+            #   > my functions work with numpy arrays, so convert
+            numpy_images = images.numpy()
+            landmarks_all = detect_facial_landmarks__batch(numpy_images, image_hashes)
+            emotions = [EMOTIONS[label] for label in labels]
+            list_of_landmark_sets = get_landmark_coordinate_sets_by_emotion__batch(landmarks_all, emotions)
+            occluded = apply_mask_to__batch(numpy_images, list_of_landmark_sets)
+
+            # Convert back to tf.Tensor
+            return tf.convert_to_tensor(occluded)
+
+        return tf.cond(
+            tf.less(tf.random.uniform([]), self.occlusion_probability),
+            occlude,
+            lambda: images
+        )
+
 class CustomBalancedDataGenerator(Sequence):
-    def __init__(self, x_data, y_data, batch_size, augmentations=None, data_inf=None, label_smoothing=0.1,paths_data=None, **kwargs):
+    def __init__(self, x_data, y_data, x_hashes, batch_size, occlusion_probability, augmentations=None, data_inf=None, label_smoothing=0.1,paths_data=None, **kwargs):
         super().__init__(**kwargs)
         self.x_data = x_data
         self.y_data = y_data
+        self.x_hashes = x_hashes
         self.batch_size = batch_size
         self.data_inf = data_inf
         self.label_smoothing = label_smoothing
         self.indices = np.arange(len(x_data))
         self.paths_data = paths_data
+        self.occlusion_probability = occlusion_probability
 
 
         # Se siamo in 'train' o 'valid', impostiamo le augmentation e il bilanciamento
@@ -118,8 +152,10 @@ class CustomBalancedDataGenerator(Sequence):
             end_idx = min((index + 1) * self.batch_size, len(self.x_data))
             batch_x = self.x_data[start_idx:end_idx]
             batch_y = self.y_data[start_idx:end_idx]
+            batch_x_hashes = self.x_hashes[start_idx:end_idx]
             batch_x = np.array(batch_x)
             batch_y = np.array(batch_y)
+            batch_x_hashes = np.array(batch_x_hashes)
             # Se hai i path
             if self.paths_data is not None:
                 batch_paths = self.paths_data[start_idx:end_idx]
@@ -127,7 +163,7 @@ class CustomBalancedDataGenerator(Sequence):
                 batch_paths = None
         else:
             # Per train/valid, selezioniamo batch bilanciati
-            batch_x, batch_y = [], []
+            batch_x, batch_y, batch_paths, batch_x_hashes = [], [], [], []
             for cls in self.classes:
                 cls_indices = self.class_indices[cls]
                 cls_pointer = self.class_pointers[cls]
@@ -136,6 +172,8 @@ class CustomBalancedDataGenerator(Sequence):
                 selected_indices = cls_indices[cls_pointer:cls_pointer + self.samples_per_class]
                 batch_x.extend(self.x_data[selected_indices])
                 batch_y.extend(self.y_data[selected_indices])
+                batch_x_hashes.extend(self.x_hashes[selected_indices])
+                batch_paths.extend(self.paths_data[selected_indices] if self.paths_data is not None else [None]*len(selected_indices))
 
                 # Aggiorna il puntatore per la classe
                 self.class_pointers[cls] += len(selected_indices)
@@ -148,19 +186,26 @@ class CustomBalancedDataGenerator(Sequence):
 
             batch_x = np.array(batch_x)
             batch_y = np.array(batch_y)
-            batch_x, batch_y = shuffle(batch_x, batch_y)
+            batch_x_hashes = np.array(batch_x_hashes)
+            batch_paths = np.array(batch_paths)
+
+            batch_x, batch_y, batch_x_hashes, batch_paths = shuffle(batch_x, batch_y, batch_x_hashes, batch_paths)
 
             # Applica il label smoothing
             if self.label_smoothing > 0:
                 batch_y = self.apply_label_smoothing(batch_y)
-            batch_paths = None
+
+        occlusion_layer = RandomOcclusion(occlusion_probability=self.occlusion_probability)
 
         # Applica il rescale o le trasformazioni per augmentation
         augmented_batch_x = np.zeros_like(batch_x)
         for i in range(len(batch_x)):
             augmented_batch_x[i] = self.augmentations.random_transform(batch_x[i])
 
-        return augmented_batch_x, batch_y
+        # TODO check if training=xxx works as intended
+        augmented_batch_x = occlusion_layer(augmented_batch_x, np.argmax(batch_y, axis=1), batch_x_hashes, training=(self.data_inf != 'test'))
+
+        return augmented_batch_x, batch_y, batch_paths, batch_x_hashes
 
 
     def on_epoch_end(self):
@@ -183,7 +228,7 @@ class CustomBalancedDataGenerator(Sequence):
         else:
             return labels
         
-def load_data_generator(path, title):
+def load_data_generator(path, title, occlusion_probability):
     def load_data_and_labels(file_path, info):
         class_names = None
         with h5py.File(file_path, 'r') as f:
@@ -206,12 +251,15 @@ def load_data_generator(path, title):
     NUM_CLASSES = len(EMOTIONS)
     X_test, y_test, class_names, test_paths = load_data_and_labels(path, title)
     y_test_one_hot = to_categorical(y_test, num_classes=NUM_CLASSES)
+    X_test_hashes = np.array([hashlib.md5(img.tobytes()).hexdigest() for img in X_test])
     test_augmentations = {}
 
     data_generator = CustomBalancedDataGenerator(
         x_data=X_test,
         y_data=y_test_one_hot,
+        x_hashes=X_test_hashes,
         batch_size=64,
+        occlusion_probability=occlusion_probability,
         augmentations=test_augmentations,
         data_inf='test',
         label_smoothing=0,

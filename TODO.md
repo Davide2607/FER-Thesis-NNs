@@ -5,3 +5,8 @@
     > https://chatgpt.com/c/6900e9cf-960c-8328-83aa-645d2a999140
     > Try the various approaches (only augs, % of augs, growing % of augs)
     > Take into account storing maybe just the landmarks in case it's an overhead, although it shouldn't be. Based on my experience the patching was much heavier, so maybe optimize that code.
+
+
+# Online Occlusion Task
+1) Create a pipeline to get the list_of_landmark_sets given an emotion JUST LIKE you did in occlude.py from d3 Masks
+2) 

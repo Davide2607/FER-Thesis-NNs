@@ -1,3 +1,5 @@
+### The numbers reported are the job IDs
+
 # Evaluation Script
 920934 -> runs only sbatch (python lines are commented) and without the ld, to see if tensorflow needs that or not
 920956 -> has ld not commented and ran both adele and occluded but with only first model 

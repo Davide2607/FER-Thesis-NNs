@@ -6,8 +6,8 @@ import time
 import tensorflow as tf
 
 from modules.config import  ACCURACY_RESULTS_PATH, ALL_MODELS_PATHS, \
-                            ADELE_TEST_SET_H5_PATH, ADELE_TEST_SET_YAML_PATH, ADELE_TEST_SET_PATH, \
-                            OCCLUDED_TEST_SET_H5_PATH, OCCLUDED_TEST_SET_YAML_PATH, OCCLUDED_TEST_SET_PATH, OCCLUDED_TEST_SET_RESIZED_PATH 
+                            ADELE_TEST_SET_H5_PATH, ADELE_TEST_SET_YAML_PATH, ADELE_TEST_SET_IMAGES_PATH, \
+                            OCCLUDED_TEST_SET_H5_PATH, OCCLUDED_TEST_SET_YAML_PATH, OCCLUDED_TEST_SET_IMAGES_PATH, OCCLUDED_TEST_SET_RESIZED_PATH 
 from modules.data import load_data_generator
 from modules.model import load_model
 from modules.eval import evaluate_model
@@ -19,12 +19,12 @@ from modules.eval import evaluate_model
 PATHS = {
     "ADELE": {
         "test_set_big": None,
-        "test_set_small": ADELE_TEST_SET_PATH,
+        "test_set_small": ADELE_TEST_SET_IMAGES_PATH,
         "test_set_h5": ADELE_TEST_SET_H5_PATH,
         "test_set_yaml": ADELE_TEST_SET_YAML_PATH,
     },
     "OCCLUDED": {
-        "test_set_big": OCCLUDED_TEST_SET_PATH,
+        "test_set_big": OCCLUDED_TEST_SET_IMAGES_PATH,
         "test_set_small": OCCLUDED_TEST_SET_RESIZED_PATH,
         "test_set_h5": OCCLUDED_TEST_SET_H5_PATH,
         "test_set_yaml": OCCLUDED_TEST_SET_YAML_PATH,

@@ -112,6 +112,11 @@ def load_model(model_name, model_path_subset, debug=False):
         raise ValueError(f"Model name '{model_name}' not found in the provided model path subset.")
 
     if "efficientnet" in model_name:
+        # Dragos: Loading of efficientNet uses the pretraining builder "build_model_final_layers()" and immediately after 
+        # unfreezes the optimal nof layers, just like "build_model_finetuning()" from Francesca's repo
+        #
+        # The other models have everything encapsulated in the saved model, so we can just load them directly.
+        #   > I'm not sure why efficient need can't do that tho, I'll ask chatgpt
         return load_model_efficientnet(model_name, model_path_subset, custom_objects)
 
     if "yolo" in model_name:
