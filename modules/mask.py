@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from math import ceil
 
 from modules.visualize import plot_image
-from modules.config import DEBUG_MASKING, DEBUG_MASKING_TIER2, MASK_COLOR, PARALLELIZE_MASKING
+from modules.config import DEBUG_MASKING, DEBUG_MASKING_TIER2, MASK_COLOR
 
 DISPLAY_OPTIONS = {
     "default":  {"radius": 200.0, "axis_ratio": 0.45, "gradient_exp": 1.5},
@@ -263,7 +263,7 @@ def apply_mask_to_all_sets(image, landmark_sets, masking_function, debug=DEBUG_M
 
     return image
 
-def apply_mask_to__batch(images, list_of_landmark_sets, parallelize=PARALLELIZE_MASKING, masking_function=mask_face_lines):
+def apply_mask_to__batch(images, list_of_landmark_sets, parallelize, masking_function=mask_face_lines):
     """
     Apply facial landmark masks to a batch of images using ThreadPoolExecutor for parallel processing..
     images : list of np.ndarray

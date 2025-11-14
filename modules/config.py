@@ -4,8 +4,6 @@ import os
 DEBUG_MASKING = False                                                # If True, will plot images during masking for debugging
 DEBUG_MASKING_TIER2 = False if DEBUG_MASKING == False else True     # If True, will plot more images during masking for debugging
 
-PARALLELIZE_MASKING = False                                          # If True, will use multithreading to speed up masking process
-
 FORCE_RECALCULATE_LANDMARKS = False                                  # If True, will recalculate and overwrite existing landmark coordinates even if they exist
 
 # 1) Globals

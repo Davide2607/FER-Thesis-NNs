@@ -72,9 +72,10 @@ def generate_h5_from_images(test_set_path, resized_path, h5_path):
             raise ValueError(f"Expected 350 paths, but found {len(paths_loaded)}.")
 
 class RandomOcclusion(keras.layers.Layer):
-    def __init__(self, occlusion_probability=1.0, **kwargs):
+    def __init__(self, occlusion_probability, parallelize_masking, **kwargs):
         super().__init__(**kwargs)
         self.occlusion_probability = occlusion_probability
+        self.parallelize_masking = parallelize_masking
 
     def call(self, images, labels, image_hashes, training=None):
         if training is None:
@@ -87,7 +88,7 @@ class RandomOcclusion(keras.layers.Layer):
             landmarks_all = detect_facial_landmarks__batch(numpy_images, image_hashes)
             emotions = [EMOTIONS[label] for label in labels]
             list_of_landmark_sets = get_landmark_coordinate_sets_by_emotion__batch(landmarks_all, emotions)
-            occluded = apply_mask_to__batch(numpy_images, list_of_landmark_sets)
+            occluded = apply_mask_to__batch(numpy_images, list_of_landmark_sets, self.parallelize_masking)
 
             # Convert back to tf.Tensor
             return tf.convert_to_tensor(occluded)
@@ -99,7 +100,7 @@ class RandomOcclusion(keras.layers.Layer):
         )
 
 class CustomBalancedDataGenerator(Sequence):
-    def __init__(self, x_data, y_data, x_hashes, batch_size, occlusion_probability, augmentations=None, data_inf=None, label_smoothing=0.1,paths_data=None, **kwargs):
+    def __init__(self, x_data, y_data, x_hashes, batch_size, occlusion_probability, parallelize_masking, augmentations=None, data_inf=None, label_smoothing=0.1,paths_data=None, **kwargs):
         super().__init__(**kwargs)
         self.x_data = x_data
         self.y_data = y_data
@@ -110,6 +111,7 @@ class CustomBalancedDataGenerator(Sequence):
         self.indices = np.arange(len(x_data))
         self.paths_data = paths_data
         self.occlusion_probability = occlusion_probability
+        self.parallelize_masking = parallelize_masking
 
 
         # Se siamo in 'train' o 'valid', impostiamo le augmentation e il bilanciamento
@@ -195,7 +197,7 @@ class CustomBalancedDataGenerator(Sequence):
             if self.label_smoothing > 0:
                 batch_y = self.apply_label_smoothing(batch_y)
 
-        occlusion_layer = RandomOcclusion(occlusion_probability=self.occlusion_probability)
+        occlusion_layer = RandomOcclusion(self.occlusion_probability, self.parallelize_masking)
 
         # Applica il rescale o le trasformazioni per augmentation
         augmented_batch_x = np.zeros_like(batch_x)
@@ -228,7 +230,7 @@ class CustomBalancedDataGenerator(Sequence):
         else:
             return labels
         
-def load_data_generator(path, title, occlusion_probability):
+def load_data_generator(path, title, occlusion_probability, parallelize_masking):
     def load_data_and_labels(file_path, info):
         class_names = None
         with h5py.File(file_path, 'r') as f:
@@ -260,6 +262,7 @@ def load_data_generator(path, title, occlusion_probability):
         x_hashes=X_test_hashes,
         batch_size=64,
         occlusion_probability=occlusion_probability,
+        parallelize_masking=parallelize_masking,
         augmentations=test_augmentations,
         data_inf='test',
         label_smoothing=0,
