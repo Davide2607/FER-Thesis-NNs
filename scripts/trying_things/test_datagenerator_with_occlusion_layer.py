@@ -45,26 +45,26 @@ if __name__ == "__main__":
     
     end_time = time.time()  # Record the end time
     elapsed_time = end_time - start_time  # Calculate elapsed time
-    print(f"Elapsed time: {elapsed_time:.6f} seconds")
+    print(f"Elapsed time for generator with occlusion: {elapsed_time:.6f} seconds")
 
-    # # 2) Second time run without occlusions
-    # start_time = time.time()
-    # test_generator = load_data_generator(DATASET, 'test', 0.0)
+    # 2) Second time run without occlusions
+    start_time = time.time()
+    test_generator = load_data_generator(DATASET, 'test', 0.0)
     
-    # for batch in test_generator:
-    #     if isinstance(batch, (list, tuple)) and len(batch) >= 2:
-    #         X_batch, y_batch, batch_paths, batch_x_hashes = batch[0], batch[1], batch[2], batch[3]
-    #     else:
-    #         raise ValueError("test_generator must yield (X_batch, y_batch) tuples")
+    for batch in test_generator:
+        if isinstance(batch, (list, tuple)) and len(batch) >= 2:
+            X_batch, y_batch, batch_paths, batch_x_hashes = batch[0], batch[1], batch[2], batch[3]
+        else:
+            raise ValueError("test_generator must yield (X_batch, y_batch) tuples")
 
-    #     print(f"Batch X shape: {X_batch.shape}, Batch y shape: {y_batch.shape}, Batch paths: {batch_paths.shape if batch_paths is not None else 'None'}, Batch hashes: {batch_x_hashes.shape}")
+        print(f"Batch X shape: {X_batch.shape}, Batch y shape: {y_batch.shape}, Batch paths: {batch_paths.shape if batch_paths is not None else 'None'}, Batch hashes: {batch_x_hashes.shape}")
 
-    #     for image in X_batch:
-    #         pass
-    #         # print(f"Image shape: {image.shape}")
-    #         # plot_image(image)
+        for image in X_batch:
+            pass
+            # print(f"Image shape: {image.shape}")
+            # plot_image(image)
 
-    # end_time = time.time()  # Record the end time
-    # elapsed_time = end_time - start_time  # Calculate elapsed time
-    # print(f"Elapsed time: {elapsed_time:.6f} seconds")
+    end_time = time.time()  # Record the end time
+    elapsed_time = end_time - start_time  # Calculate elapsed time
+    print(f"Elapsed time for generator without occlusion: {elapsed_time:.6f} seconds")
 
